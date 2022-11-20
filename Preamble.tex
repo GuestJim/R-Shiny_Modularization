@@ -1,0 +1,207 @@
+\usepackage{indentfirst}
+%	adds indent to first paragraph (something Latex does not normally do)
+
+\usepackage{csquotes}
+%	Context Sensitive Quotes - will convert straight quotes to the appropriate smart quotes automatically.
+
+\usepackage{titletoc,tocloft}
+
+\setcounter{secnumdepth}{0}
+
+\setlength{\parindent}{2em}
+%	adds an indent to the paragraphs
+
+\linespread{1.25}
+%	line spacing
+
+\usepackage{ragged2e}
+
+\usepackage{geometry}
+\geometry{
+	margin=1.0in,
+	top=0.75in,
+	headheight=1.80cm,
+	headsep=0.75ex,
+	%footsep=0.5in,
+	footskip=0.5in,
+	bottom=1.0in
+}
+\savegeometry{normal}
+
+\usepackage{graphicx}
+\usepackage[space]{grffile}
+%	this allows spaces to be used the file names and paths of images
+
+\DeclareGraphicsExtensions{.png,.pdf}
+
+\usepackage{float}
+\renewcommand*\listfigurename{Images}
+%cof changing list of figures title, but not necessary when creating own float type
+\floatstyle{plaintop}
+\newfloat{imageflt}{H}{loi}
+
+\usepackage{caption}
+\captionsetup{
+	skip=-0.5\baselineskip,
+	labelformat=empty,
+}
+%this will set the skip between the caption and figure to be effectively missing for all floats
+
+\DeclareCaptionStyle{imageflt}{
+	listformat=empty,
+	justification=centering,
+}
+\captionsetup[imageflt]{
+	style=imageflt,
+}
+
+\newcommand{\image}[2][width=1.0\textwidth, totalheight=0.33\textheight]{
+%	the first argument is optional with the default value given above in the second set of square brackets, so no if/then statement is needed
+	\def\options{#1}
+	\def\file{#2}
+	
+	\begin{imageflt}[H]
+		\caption*{\textbf{#2}}
+		%\captionlistentry{#2}
+%
+		\vspace{2ex}	\hrule	\nobreak	\vspace{2pt}
+	%	puts space above and below the rule, while also preventing there from being a page break between the rule and the image
+		\hfill	%\hspace{-2em}
+	%	subtracting 2em as this is the indent length that I cannot otherwise remove
+			\includegraphics[keepaspectratio,#1]{{#2}}	\nobreak
+		\hspace*{\fill}
+	%	for some reason this works better than hfill
+		\vspace{2pt}	\hrule	\vspace{2ex}
+	\end{imageflt}
+}
+%by using Figures I can have the titles easily added and add \listoffigures to show all of the figures in a section
+
+\usepackage{hyperref}
+%	the package for hyperlinks and setting their color, highlight, etc.
+
+\hypersetup{
+	colorlinks,	%removes the box around links
+	linkcolor=black,
+	filecolor=black,
+	urlcolor=blue,
+%	linktoc=all,	%makes the name and page numbers links
+}
+\newcommand{\changeurlcolor}[1]{\hypersetup{urlcolor=#1}}
+
+\usepackage{qrcode}
+
+
+\usepackage{listings}
+%	this is the package that will properly read and apply a special style to code
+
+\definecolor{codeBackground}{RGB}{242,242,242}
+\definecolor{comments}{RGB}{0,100,0}
+\definecolor{keywords}{RGB}{0,0,200}
+
+\lstset{
+	breaklines			=	true,
+	breakatwhitespace	=	true,
+	breakautoindent		=	true,
+	breakindent			=	1em,
+	tabsize				=	4,
+	lineskip			=	-0.5ex,
+	frame				=	tb,
+	backgroundcolor		=	\color{codeBackground},
+	commentstyle		=	\color{comments},
+	keywordstyle		=	\color{keywords}\nolinebreak,
+	sensitive			=	true,
+	aboveskip			=	3ex,
+	belowskip			=	2ex,
+	showstringspaces	=	false,
+}
+%	these options will be set for all languages used
+
+\lstnewenvironment{styleR}
+{%
+	\noindent
+	% \minipage{\textwidth}
+	\lstset{
+		language			=	R,
+		morekeywords		=	{shinyApp, paste0, exFUN, tagList, fluidPage, titlePanel, numericInput, fluidRow, column, checkboxInput, reactive, observe, moduleServer, <<-, |>, NS, ns, exampleUI, uiOutput, renderUI, exampleServer, renderTable, tableOutput, reactiveValuesToList, reactiveValues, exampleCount, isTruthy},
+	}
+	%	by specifying the language here, it will load up its options, but still use the options set above
+}	{%
+	% \endminipage
+}
+\newcommand{\lineR}[1]{\lstinline[language = R, morekeywords = {shinyApp, paste0, exFUN, tagList, fluidPage, titlePanel, numericInput, fluidRow, column, checkboxInput, reactive, observe, moduleServer, <<-, |>, NS, ns, exampleUI, uiOutput, renderUI, exampleServer, renderTable, tableOutput, reactiveValuesToList, reactiveValues, exampleCount, isTruthy}]{#1}}
+\newcommand{\lineRb}[1]{\textbf{\lstinline[language = R, morekeywords = {shinyApp, paste0, exFUN, tagList, fluidPage, titlePanel, numericInput, fluidRow, column, checkboxInput, reactive, observe, moduleServer, <<-, |>, NS, ns, exampleUI, uiOutput, renderUI, exampleServer, renderTable, tableOutput, reactiveValuesToList, reactiveValues, exampleCount, isTruthy}]{#1}}}
+
+\newcommand{\listingfile}[3]{
+	% \lstset{language=#1, caption={[\namesection: Code \thelstlisting]}}
+	% \lstset{language=#1, caption={Code \thelstlisting}}
+	\clearpage
+	{\lstset{language=#1}
+	
+	\noindent
+	% \begin{minipage}{\textwidth}
+		\subsection{#3}
+		% \textbf{#3}
+	
+		\lstinputlisting{"#2/#3"}
+	% \end{minipage}
+	}
+}
+
+\newcommand{\listingfrag}[5]{
+	% \lstset{language=#1, caption={[\namesection: Code \thelstlisting]}}
+	% \lstset{language=#1, caption={Code \thelstlisting}}
+	\clearpage
+	{\lstset{language=#1}
+	
+	\noindent
+	% \begin{minipage}{\textwidth}
+		\subsection{#3 (Fragment)}
+		% \textbf{#3}
+	
+		\lstinputlisting[firstline = #4, lastline = #5]{"#2/#3"}
+	% \end{minipage}
+	}
+}
+
+% \renewcommand{\contentsname}{\hfill \bfseries Table of Contents \hfill}
+\renewcommand{\contentsname}{\bfseries{Table of Contents}}
+
+\setlength\cftbeforetoctitleskip{0ex}
+\setlength\cftaftertoctitleskip{0ex}
+%	removes the vertical spacing above and below the Table of Contents header
+
+\renewcommand{\cftsecfont}{}					%	clears any special font styles
+\setlength{\cftbeforepartskip}{3.0ex}			%	vertical spacing between Parts
+\setlength{\cftbeforesecskip}{0.5ex}			%	vertical spacing between Sections
+\renewcommand{\cftsecleader}{\cftdotfill{4}}	%	adds dots and sets the dot separation
+\renewcommand{\cftsecpagefont}{}				%	clears any special font styles for the page number
+
+\renewcommand{\cftsubsecfont}{\itshape}			%	makes the subsection entries italicized
+\setlength{\cftbeforesubsecskip}{0.75ex}		%	vertical spacing
+\renewcommand{\cftsubsecleader}{\cftdotfill{8}}	%	adds dots and sets the dot separation
+\renewcommand{\cftsecpagefont}{}				%	clears any special font styles for the page number
+\cftsetindents{subsection}{2em}{2em}			%	sets the indent for the entry and the numwidth
+
+\cftpagenumbersoff{part}	%	removes page numbers from the Part
+
+\newcommand{\Part}[1]{
+	\phantomsection
+	\addcontentsline{toc}{part}{#1}
+	% \part*{#1}
+%	\renewcommand{\namepart}{#1}
+%		for fancy headings I am not using (see GLSC Curriculum)
+}
+%	this will set the name of the part and add it to the TOC without adding the massive header to the page
+
+\newcommand{\DBS}{\textbackslash\textbackslash}
+\newcommand{\SBS}{\textbackslash}
+\newcommand{\n}{\textbackslash{n}}
+\renewcommand{\r}{\textbackslash{r}}
+\renewcommand{\>}{\textgreater}
+\newcommand{\<}{\textless}
+
+
+\widowpenalty10000
+\clubpenalty10000
+
+\newcommand{\subCustomFunction}{\addcontentsline{toc}{subsubsection}{Custom Functions}}

@@ -1,0 +1,71 @@
+\documentclass[11pt, letterpaper]{article}
+
+\title{R-Shiny Modularization}
+\author{Jim Pitchford}
+
+\input{"Preamble.tex"}
+
+\usepackage{multicol}
+
+% \usepackage[backend=biber]{biblatex}
+% \addbibresource{Sources.bib}
+
+\begin{document}
+
+\raggedright
+\setlength{\parindent}{2em}
+
+\pagenumbering{Roman}
+
+\Part{Guide Purpose}
+\input{"00 - Abstract.ltx"}
+
+\clearpage
+\pdfbookmark{\contentsname}{toc}	%adds a bookmark of the TOC to the file but not the list itself
+\tableofcontents
+%	need to check on how to have \part skipped, so \section is the top level
+
+\clearpage
+\pagenumbering{arabic}
+\setcounter{page}{1}
+
+\Part{Basics}
+\section{Custom Functions in R}
+\input{"01 - Custom Functions/01 - Custom Functions.ltx"}
+
+\clearpage
+\section{Namespaces in Shiny}
+\input{"02 - Namespaces/02 - Namespaces.ltx"}
+
+\clearpage
+\Part{Example Applet}
+\section{Example Applet}
+\input{"03 - Example Applet/03 - Example Applet.ltx"}
+
+\clearpage
+\Part{Shiny Modularization}
+\section{UI Modularization}
+\input{"04 - UI Modularization/04 - UI Modularization.ltx"}
+
+\clearpage
+\section{Server Modularization}
+\input{"05 - Server Modularization/05 - Server Modularization.ltx"}
+
+\clearpage
+\Part{Advanced Modularization}
+\section{Advanced - Commons}
+\input{"06 - Advanced - Commons/06 - Advanced - Commons.ltx"}
+
+\clearpage
+\section{Advanced - reactiveValuesToList}
+\input{"07 - Advanced - reactiveValuesToList/07 - Advanced - reactiveValuesToList.ltx"}
+
+\clearpage
+\section{Advanced - Namespace Piercing}
+\input{"08 - Advanced - Namespace Piercing/08 - Advanced - Namespace Piercing.ltx"}
+
+\clearpage
+\section{Advanced - Using moduleServer Returns}
+\input{"09 - Advanced - moduleServer returns/09 - Advanced - moduleServer returns.ltx"}
+
+\end{document}

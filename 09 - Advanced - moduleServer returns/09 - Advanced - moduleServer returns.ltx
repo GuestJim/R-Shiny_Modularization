@@ -1,0 +1,88 @@
+While I do not doubt there are additional tricks with modularizing Shiny code, this is the last one I have for you.
+Technically I have already written the pieces of it, but sometimes completing the puzzle is necessary.
+
+Something I have not mentioned but has been true for the example applet is a bug concerning \lineR{randCount}.
+Each time the number of modules, \lineR{modCount}, is changed, the value of \lineR{randCount} for each module is reset to the default, which is 3.
+There is a fix for this, and actually a somewhat elegant one I think, and the first step is to change \lineR{exampleUI} a little.
+
+\begin{styleR}
+exampleUI	<-	function(name, VAL = 3)	{
+	ns	<-	NS(name)
+
+	tagList(
+		fluidRow(
+			column(2,	numericInput(inputId = ns('randCount'),	label = paste0("Count ", name),	value = VAL,	min = 0)),
+			column(2,	checkboxInput(inputId = ns('striping'),	label = "Table Striping")),
+		),
+		tableOutput(ns('TAB'))
+	)
+}
+\end{styleR}
+
+As you can see, I have replaced the explicitly given \lineR{value} argument for the \lineR{numericInput} to instead take the module's new argument, \lineR{VAL}, which has a default of 3.
+The reason for the issue I described is that each time \lineR{modCount} changes, the modules are recreated.
+This is because \lineR{lapply} always runs through the entire list it is given, and each time \lineR{exampleUI} is called, that \lineR{value} argument is reapplied.
+By making the \lineR{VAL} argument it is possible to set \lineR{randCount} value each time the module is created, so while new random numbers will be generated, their count per module can remain unchanged.
+
+Of course a catch to this is we need some way to pass \lineR{exampleUI} the current value of \lineR{randCount} for each instance, but also recognize when no such value exists, so that a default value is provided.
+Turns out this is actually not that difficult to do, though I would not consider this solution easiest to think of because this is not how \lineR{moduleServer} has been used before.
+
+\begin{styleR}
+UIcreate	<-	function(name, VAL = 3)	{
+	moduleServer(name, function(input, output, session)	{
+		if (isTruthy(input$randCount))	return(input$randCount)
+		return(VAL)
+	}) |> exampleUI(name, VAL = _)
+}
+\end{styleR}
+
+In some but not all respects, calling \lineR{moduleServer} is like calling \lineR{function}, and in this case we are exploiting the fact it does return a value; specifically the value returned by the \lineR{function} call we make within it.
+
+Ignoring the contents of \lineR{moduleServer} for the moment, the value it returns is passed by a pipe into \lineR{exampleUI}.
+Normally a pipe will pass a value in as the first argument for a function, but that would be \lineR{name} for \lineR{exampleUI}, so we use the pipe placeholder, "\lineR{\_}".
+This allows the value, or more generically the object being piped in to go wherever we wish in the function, though it must be a named argument.
+In other words we do have to specify it is for the \lineR{VAL} argument of \lineR{exampleUI} for this to work.
+
+Looking inside \lineR{moduleServer} we find a conditional using the \lineR{isTruthy} function, which is a Shiny function but so handy I somewhat wish it were part of base R.
+Basically it has multiple reasonable conditions that will return \lineR{FALSE}, such as being \lineR{FALSE} or \lineR{NULL}.
+In this case it will return \lineR{FALSE} whenever there is no \lineR{randCount} object within the namespaced \lineR{input}, such as when that specific instance did not previously exist.
+When that is the case, the \lineR{VAL} argument of the outer \lineR{UIcreate} function will be returned by \lineR{moduleServer} and piped into \lineR{exampleUI}.
+
+If \lineR{randCount} does exist in that namespace, however, then \lineR{isTruthy} will return \lineR{TRUE}, and then the specific value is returned.
+It is the calling of \lineR{exampleUI} that was resetting \lineR{randCount}, so by getting its value before it is called again, and passing it into the UI module, the value does not change.
+The specific random numbers are, because the modules are being recreated, but their count can be preserved.
+
+Before ending this, there is something more we can do with \lineR{UIcreate} that is kind of neat.
+
+ \begin{styleR}
+UIcreate	<-	function(name, VAL = 3)	{
+	exampleServer(name)
+moduleServer(name, function(input, output, session)	{
+		if (isTruthy(input$randCount))	return(input$randCount)
+		return(VAL)
+	}) |> exampleUI(name, VAL = _)
+}
+\end{styleR}
+
+By calling \lineR{exampleServer} outside of \lineR{moduleServer}, the namespaces will not be nested, which you can do, but personally I want to avoid and would not be helpful here.
+It also means that one call of \lineR{UIcreate} calls both the UI and server modules, simplifying the applet.
+Also, it is necessary to call \lineR{exampleUI} last, because that is what we want to be returned by \lineR{UIcreate}.
+
+\begin{styleR}
+observe({
+	output$modules	<-	renderUI(	lapply(modList(),	UIcreate,	3)	)
+	output$randCount	<-	renderText({
+		COUNT	<-	unlist(lapply(modList(),	function(IN)	input[[	NS(IN, "randCount")	]]))
+		paste0("There are ", sum(COUNT), " random numbers")
+	})
+})
+\end{styleR}
+
+As you can see, we are still using \lineR{renderUI} and \lineR{lapply}, so we need \lineR{exampleUI} to be returned as it holds the UI elements.
+
+Just a couple final notes here, with the first being that the 3 at the end of calling \lineR{lapply} is not necessary, but it is passed to \lineR{UIcreate} as its \lineR{VAL} argument.
+If you prefer the modules start with a different count of random numbers, this is the value to change, as it will propagate to the appropriate places from there.
+
+The other note is I chose to use the pipe here because I do believe it makes the code look cleaner in this case (surrounding the whole block of \lineR{moduleServer} is not ideal) and it is a decent example of using it with the placeholder.
+
+That is it; the last advanced trick I have for modularizing Shiny code is to recognize \lineR{moduleServer} does return an object, and that can then be taken advantage of.
