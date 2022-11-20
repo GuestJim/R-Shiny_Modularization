@@ -6,3 +6,5 @@ As you can see I have created separate sections for this guide, including some "
 My intent is to have increasing complexity with the earlier sections but then for the "Advanced" sections to demonstrate some of the undocumented or poorly documented tricks I have found while solving specific problems.
 
 I have only worked with Shiny 1.7+ and so this guide will also target that version level.
+
+Related gist: [R-Shiny_Modularization_gist.r](https://gist.github.com/GuestJim/110ef7fd91a5a8521dee4c74d98aaf4b)
